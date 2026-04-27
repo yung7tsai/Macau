@@ -1,0 +1,6 @@
+{
+  "name": "Macau Zen Planner",
+  "description": "A Japanese minimalist travel assistant for Macau with parallel timeline support and budget tracking.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["Firebase Sync", "Weather Integration", "Split Timeline"]
+}

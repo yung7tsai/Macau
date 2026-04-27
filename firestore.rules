@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow create: if isOwner(userId) 
+        && incoming().keys().hasAll(['displayName', 'email'])
+        && incoming().displayName is string && incoming().displayName.size() < 100
+        && incoming().email is string && incoming().email.size() < 100;
+      allow update: if isOwner(userId)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL'])
+        && (!incoming().keys().contains('displayName') || (incoming().displayName is string && incoming().displayName.size() < 100));
+    }
+
+    match /trips/{tripId} {
+      function isValidTrip(data) {
+        return data.name is string && data.name.size() <= 100
+          && data.startDate is string && data.startDate.size() <= 20
+          && data.endDate is string && data.endDate.size() <= 20
+          && data.ownerId == request.auth.uid;
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidTrip(incoming()) && isValidId(tripId);
+      allow update: if isOwner(existing().ownerId) && isValidTrip(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'startDate', 'endDate', 'participants']);
+      allow delete: if isOwner(existing().ownerId);
+
+      match /itinerary/{itemId} {
+        function isValidItem(data) {
+          return data.title is string && data.title.size() <= 200
+            && data.dayIndex is int
+            && data.type in ['attraction', 'restaurant', 'transport', 'flight', 'checkin', 'other']
+            && (data.get('location', '') is string && data.get('location', '').size() <= 500);
+        }
+
+        allow read, list: if isSignedIn();
+        allow create: if isSignedIn() && isValidItem(incoming()) && isValidId(itemId);
+        allow update: if isSignedIn() && isValidItem(incoming());
+        allow delete: if isSignedIn();
+      }
+
+      match /expenses/{expenseId} {
+        function isValidExpense(data) {
+          return data.description is string && data.description.size() <= 200
+            && data.amount is number
+            && data.date is string && data.date.size() <= 50;
+        }
+
+        allow read, list: if isSignedIn();
+        allow create: if isSignedIn() && isValidExpense(incoming()) && isValidId(expenseId);
+        allow update: if isSignedIn() && isValidExpense(incoming());
+        allow delete: if isSignedIn();
+      }
+
+      match /quickInfo/{infoId} {
+        allow read, list: if isSignedIn();
+        allow create, update, delete: if isSignedIn();
+      }
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "Trip": {
+      "title": "Trip",
+      "description": "Metadata for a travel plan",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["name", "startDate", "endDate", "ownerId"]
+    },
+    "ItineraryItem": {
+      "title": "Itinerary Item",
+      "description": "An event in the travel timeline",
+      "type": "object",
+      "properties": {
+        "dayIndex": { "type": "integer" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "title": { "type": "string" },
+        "location": { "type": "string" },
+        "type": { "type": "string", "enum": ["attraction", "restaurant", "transport", "flight", "checkin", "other"] },
+        "notes": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "isSplit": { "type": "boolean" },
+        "column": { "type": "integer", "description": "0 for full width, 1 or 2 for split columns" }
+      },
+      "required": ["dayIndex", "title", "type"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Budget tracking entry",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "payer": { "type": "string" }
+      },
+      "required": ["description", "amount", "date"]
+    },
+    "QuickInfo": {
+      "title": "Quick Information",
+      "description": "Emergency numbers, flight details, etc.",
+      "type": "object",
+      "properties": {
+        "category": { "type": "string", "enum": ["flight", "accommodation", "emergency", "other"] },
+        "title": { "type": "string" },
+        "content": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "trips": {
+      "schema": "Trip",
+      "description": "Collection of trips"
+    },
+    "trips/{tripId}/itinerary": {
+      "schema": "ItineraryItem",
+      "description": "Daily schedule items for a trip"
+    },
+    "trips/{tripId}/expenses": {
+      "schema": "Expense",
+      "description": "Expenses for a trip"
+    },
+    "trips/{tripId}/quickInfo": {
+      "schema": "QuickInfo",
+      "description": "Reference info for a trip"
+    },
+    "users": {
+        "schema": {
+            "type": "object",
+            "properties": {
+                "displayName": { "type": "string" },
+                "email": { "type": "string" },
+                "photoURL": { "type": "string" }
+            }
+        },
+        "description": "User profiles"
+    }
+  }
+}
