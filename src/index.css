@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-zen-bg: #FDFCFB;
+  --color-zen-ink: #1F1F1F;
+  --color-zen-muted: #808080;
+  --color-zen-border: #E8E5E2;
+  --color-zen-accent: #C44536; /* Japanese traditional red */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-zen-bg);
+    color: var(--color-zen-ink);
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.zen-card {
+  @apply bg-white border border-zen-border rounded-xl shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)];
+}
+
+.zen-button {
+  @apply px-4 py-2 bg-zen-ink text-white rounded-lg hover:opacity-90 active:scale-95 transition-all;
+}
+
+.zen-input {
+  @apply px-3 py-2 bg-transparent border border-zen-border rounded-lg outline-none focus:border-zen-muted;
+}
